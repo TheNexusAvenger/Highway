@@ -7,4 +7,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Nexus.Logging" Version="1.2.0" />
+    </ItemGroup>
+
 </Project>
