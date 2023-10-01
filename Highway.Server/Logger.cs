@@ -23,6 +23,19 @@ public class Logger
             DefaultLineWidth = 200,
         });
     }
+
+    /// <summary>
+    /// Sets the minimum log level.
+    /// </summary>
+    /// <param name="logLevel">Minimum log level to show.</param>
+    public static void SetLogLevel(LogLevel logLevel)
+    {
+        foreach (var output in NexusLogger.Outputs)
+        {
+            if (output is not ConsoleOutput consoleOutput) continue;
+            consoleOutput.MinimumLevel = logLevel;
+        }
+    }
     
     /// <summary>
     /// Logs a message as a Debug level.

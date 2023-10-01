@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using System.CommandLine;
+using Microsoft.AspNetCore.Diagnostics;
 
 namespace Highway.Server;
 
@@ -13,12 +14,42 @@ public class Program
     /// Runs the program.
     /// </summary>
     /// <param name="args">Arguments from the command line.</param>
-    public static void Main(string[] args)
+    public static int Main(string[] args)
     {
-        // TODO: Support command line arguments to enable debug and not start server.
+        // Create the serve command.
+        var debugLogToggle = new Option<bool>(
+            name: "--debug",
+            description: "Enables debug logging.");
+
+        var serveCommand = new Command("serve", "Starts hosting the server for Highway.")
+        {
+            debugLogToggle
+        };
+        serveCommand.SetHandler(async (debug) => await RunServer(debug), debugLogToggle);
+        
+        // Create the root command.
+        var rootCommand = new RootCommand("Highway - For using external editors on teams that won't use them.");
+        rootCommand.AddOption(debugLogToggle);
+        rootCommand.AddCommand(serveCommand);
+
+        // Run the command and return the status code.
+        return rootCommand.InvokeAsync(args).Result;
+    }
+
+    /// <summary>
+    /// Runs the server.
+    /// </summary>
+    private static async Task RunServer(bool debug)
+    {
+        // Enable debug logging.
+        if (debug)
+        {
+            Logger.SetLogLevel(LogLevel.Debug);
+        }
+        
         // Build the server.
         Logger.Debug("Preparing web server.");
-        var builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder();
         builder.Logging.ClearProviders();
         builder.Logging.AddProvider(Logger.NexusLogger);
         builder.Services.AddControllers();
@@ -39,6 +70,6 @@ public class Program
         });
         app.MapControllers();
         Logger.Info($"Starting server on port {Port}.");
-        app.Run($"http://*:{Port}");
+        await app.RunAsync($"http://*:{Port}");
     }
 }
