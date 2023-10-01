@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using Highway.Server.Util;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace Highway.Server;
@@ -37,6 +38,23 @@ public class Program
     }
 
     /// <summary>
+    /// Verifies that Highway can start.
+    /// </summary>
+    /// <returns>Whether the app can start.</returns>
+    private static bool Verify()
+    {
+        // Return if there is no git directory.
+        if (FileUtil.GetParentDirectoryOf(FileUtil.GitDirectoryName) == null)
+        {
+            Logger.Warn("No git project found in the current directory or parent directory.");
+            return false;
+        }
+        
+        // Return true (valid to start).
+        return true;
+    }
+
+    /// <summary>
     /// Runs the server.
     /// </summary>
     private static async Task RunServer(bool debug)
@@ -45,6 +63,12 @@ public class Program
         if (debug)
         {
             Logger.SetLogLevel(LogLevel.Debug);
+        }
+        
+        // Return if the project is not valid.
+        if (!Verify())
+        {
+            return;
         }
         
         // Build the server.
