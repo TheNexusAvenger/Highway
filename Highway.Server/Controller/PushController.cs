@@ -185,7 +185,7 @@ public class PushController : ControllerBase
             }
             
             // Update the files.
-            await session.WriteFilesAsync(gitProcess.GitPath, configuration.Paths);
+            await session.WriteFilesAsync(gitProcess.GitPath, configuration);
             
             // Commit and push the changes.
             var commitReturnCode = await gitProcess.RunCommandAsync($"commit -am \"{gitConfiguration.CommitMessage ?? "Update from Roblox Studio."}\"");

@@ -1,4 +1,5 @@
 ﻿using System.Security;
+using Highway.Server.Model.Project;
 using Highway.Server.Model.State;
 using Highway.Server.State;
 using Highway.Server.Util;
@@ -77,10 +78,13 @@ public class PushSessionTest
         
         var temporaryDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         Directory.CreateDirectory(temporaryDirectory);
-        this._pushSession.WriteFilesAsync(temporaryDirectory, new Dictionary<string, string>()
+        this._pushSession.WriteFilesAsync(temporaryDirectory, new Manifest()
         {
-            {"Path1", "src/path1"},
-            {"Path1.Path6", "src/path6/"}
+            Paths = new Dictionary<string, string>()
+            {
+                {"Path1", "src/path1"},
+                {"Path1.Path6", "src/path6/"}
+            }
         }).Wait();
         
         Assert.That(File.ReadAllText(Path.Combine(temporaryDirectory, "src/path1/Path2")), Is.EqualTo("Source1"));
@@ -110,11 +114,14 @@ public class PushSessionTest
                 {"Path1/Path8", HashUtil.GetHash("Source5")},
             },
         }));
-
-        this._pushSession.WriteFilesAsync(temporaryDirectory, new Dictionary<string, string>()
+        
+        this._pushSession.WriteFilesAsync(temporaryDirectory, new Manifest()
         {
-            {"Path1", "src/path1"},
-            {"Path1.Path6", "src/path6/"}
+            Paths = new Dictionary<string, string>()
+            {
+                {"Path1", "src/path1"},
+                {"Path1.Path6", "src/path6/"}
+            }
         }).Wait();
         
         Assert.That(File.Exists(Path.Combine(temporaryDirectory, "src/path1/Path8")), Is.EqualTo(false));

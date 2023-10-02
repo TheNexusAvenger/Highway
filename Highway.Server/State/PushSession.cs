@@ -1,4 +1,5 @@
 ﻿using System.Security;
+using Highway.Server.Model.Project;
 using Highway.Server.Model.State;
 using Highway.Server.Util;
 using Newtonsoft.Json;
@@ -102,7 +103,12 @@ public class PushSession
         }
     }
 
-    public async Task WriteFilesAsync(string parentDirectory, Dictionary<string, string> paths)
+    /// <summary>
+    /// Writes the files of the session.
+    /// </summary>
+    /// <param name="parentDirectory">Parent directory to write to.</param>
+    /// <param name="manifest">Manifest of the project.</param>
+    public async Task WriteFilesAsync(string parentDirectory, Manifest manifest)
     {
         // Remove old files not stored in the new hash collection.
         // Empty folders aren't cleared since they will not be saved by git.
@@ -113,7 +119,7 @@ public class PushSession
             foreach (var (scriptPath, _) in previousHashes.Hashes!)
             {
                 if (this.ScriptHashCollection.Hashes!.ContainsKey(scriptPath));
-                var scriptFilePath = GetPath(scriptPath, parentDirectory, paths);
+                var scriptFilePath = manifest.GetPathForScriptPath(parentDirectory, scriptPath);
                 if (scriptFilePath == null || !File.Exists(scriptFilePath)) continue;
                 File.Delete(scriptFilePath);
             }
@@ -122,7 +128,7 @@ public class PushSession
         // Write the new files.
         foreach (var (scriptPath, scriptContents) in this.Scripts)
         {
-            var scriptFilePath = GetPath(scriptPath, parentDirectory, paths);
+            var scriptFilePath = manifest.GetPathForScriptPath(parentDirectory, scriptPath);
             if (scriptFilePath == null) continue;
             Directory.CreateDirectory(Directory.GetParent(scriptFilePath)!.FullName);
             await File.WriteAllTextAsync(scriptFilePath, scriptContents);
@@ -130,21 +136,5 @@ public class PushSession
         
         // Write the hash file.
         await File.WriteAllTextAsync(hashesFilePath, JsonConvert.SerializeObject(this.ScriptHashCollection, Formatting.Indented));
-    }
-
-    private string? GetPath(string scriptPath, string parentDirectory, Dictionary<string, string> paths)
-    {
-        // Determine the longest file path that matches the script path.
-        string? baseScriptPath = null;
-        foreach (var (newBaseScriptPath, _) in paths)
-        {
-            if (!scriptPath.StartsWith(newBaseScriptPath.Replace('.', '/'))) continue;
-            if (baseScriptPath != null && baseScriptPath.Length > newBaseScriptPath.Length) continue;
-            baseScriptPath = newBaseScriptPath;
-        }
-        
-        // Return the path.
-        if (baseScriptPath == null) return null;
-        return Path.Combine(parentDirectory, paths[baseScriptPath], scriptPath.Replace(baseScriptPath.Replace('.', '/') + "/", ""));
     }
 }
