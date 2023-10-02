@@ -1,0 +1,12 @@
+{
+    "name": "Highway-Plugin",
+    "tree": {
+        "$className": "DataModel",
+        "ReplicatedStorage": {
+            "$className": "ReplicatedStorage",
+            "HighwayPlugin": {
+                "$path": "."
+            }
+        }
+    }
+}
