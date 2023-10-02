@@ -164,7 +164,8 @@ public class PushController : ControllerBase
             
             // Prepare the git branch.
             var gitProcess = await GitProcess.GetCurrentProcess().ForkAsync();
-            var gitConfiguration = FileUtil.Get<Manifest>(FileUtil.ProjectFileName)!.Git;
+            var gitConfiguration = FileUtil.Get<Manifest>(FileUtil.FindFileInParent(FileUtil.ProjectFileName))!.Git;
+            await gitProcess.RunCommandAsync("fetch");
             await gitProcess.RunCommandAsync($"checkout \"{gitConfiguration.CheckoutBranch}\"");
             
             // Update the files.
@@ -172,7 +173,7 @@ public class PushController : ControllerBase
             await System.IO.File.WriteAllTextAsync(Path.Combine(gitProcess.GitPath, FileUtil.HashesFileName), JsonConvert.SerializeObject(session.ScriptHashCollection, Formatting.Indented));
             
             // Commit and push the changes.
-            await gitProcess.RunCommandAsync($"git commit -am \"{gitConfiguration.CommitMessage ?? "Update from Roblox Studio."}\"");
+            await gitProcess.RunCommandAsync($"commit -am \"{gitConfiguration.CommitMessage ?? "Update from Roblox Studio."}\"");
             // TODO: Remove hard-coded "origin" remote.
             await gitProcess.RunCommandAsync($"push origin HEAD:\"{gitConfiguration.PushBranch}\"");
         }
