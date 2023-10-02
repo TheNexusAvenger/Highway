@@ -4,9 +4,6 @@
         "$path": "plugin/src",
         "NexusPluginComponents": {
             "$path": "module/Nexus-Plugin-Components/"
-        },
-        "SHA": {
-            "$path": "module/Pure-Lua-SHA/sha2.lua"
         }
     }
 }

@@ -1,6 +1,3 @@
 [submodule "module/Nexus-Plugin-Components"]
 	path = module/Nexus-Plugin-Components
 	url = https://github.com/TheNexusAvenger/Nexus-Plugin-Components.git
-[submodule "module/Pure-Lua-SHA"]
-	path = module/Pure-Lua-SHA
-	url = https://github.com/Egor-Skriptunoff/pure_lua_SHA.git

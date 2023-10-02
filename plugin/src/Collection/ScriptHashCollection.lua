@@ -5,10 +5,21 @@ Stores the hashes of scripts.
 --]]
 --!strict
 
+local SHA256 = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("SHA256"))
+
 local ScriptHashCollection = {}
 ScriptHashCollection.__index = ScriptHashCollection
 
+export type ScriptHashCollection = {
+    GetScriptPath: (Script: Instance) -> (string),
+    FindInstances: (Path: string, Parent: Instance?) -> ({Instance}),
+    FindScript: (Path: string, Parent: Instance?) -> (LuaSourceContainer?),
 
+    new: () -> (ScriptHashCollection),
+    Hashes: {[string]: string},
+    AddScript: (self: ScriptHashCollection, Script: Script | LocalScript | ModuleScript) -> (),
+    AddScripts: (self: ScriptHashCollection, Container: Instance) -> (),
+}
 
 --[[
 Returns the path for a script.
@@ -102,6 +113,32 @@ function ScriptHashCollection.FindScript(Path: string, Parent: Instance?): LuaSo
     return nil
 end
 
+--[[
+Creates a ScriptHashCollection instance.
+--]]
+function ScriptHashCollection.new(): ScriptHashCollection
+    return (setmetatable({
+        Hashes = {},
+    }, ScriptHashCollection) :: any) :: ScriptHashCollection
+end
+
+--[[
+Adds a script hash.
+--]]
+function ScriptHashCollection:AddScript(Script: Script | LocalScript | ModuleScript): ()
+    self.Hashes[ScriptHashCollection.GetScriptPath(Script)] = SHA256(Script.Source)
+end
+
+--[[
+Adds a container of scripts.
+--]]
+function ScriptHashCollection:AddScripts(Container: Instance): ()
+    for _, Child in Container:GetDescendants() do
+        if not Child:IsA("LuaSourceContainer") then continue end
+        self:AddScript(Child :: any)
+    end
+end
 
 
-return ScriptHashCollection
+
+return (ScriptHashCollection :: any) :: ScriptHashCollection
