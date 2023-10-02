@@ -1,9 +1,12 @@
 ﻿using System.Security;
+using Highway.Server.Model.Project;
 using Highway.Server.Model.Request;
 using Highway.Server.Model.Response;
 using Highway.Server.Model.State;
 using Highway.Server.State;
+using Highway.Server.Util;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Highway.Server.Controller;
 
@@ -96,7 +99,7 @@ public class PushController : ControllerBase
     
     [HttpPost]
     [Route("/push/session/complete")]
-    public ObjectResult PostCompleteSession([FromBody] PushCompleteRequest completeRequest)
+    public async Task<ObjectResult> PostCompleteSession([FromBody] PushCompleteRequest completeRequest)
     {
         // Return if there is a request issue.
         if (completeRequest.Session == null)
@@ -122,8 +125,22 @@ public class PushController : ControllerBase
         // Complete the push.
         try
         {
+            // Complete the session.
             var rootScriptInstance = session.Complete();
-            // TODO: Implement rest.
+            
+            // Prepare the git branch.
+            var gitProcess = await GitProcess.GetCurrentProcess().ForkAsync();
+            var gitConfiguration = FileUtil.Get<Manifest>(FileUtil.ProjectFileName)!.Git;
+            await gitProcess.RunCommandAsync($"checkout \"{gitConfiguration.CheckoutBranch}\"");
+            
+            // Update the files.
+            // TODO: Apply changes (update files + delete old ones).
+            await System.IO.File.WriteAllTextAsync(Path.Combine(gitProcess.GitPath, FileUtil.HashesFileName), JsonConvert.SerializeObject(session.ScriptHashCollection, Formatting.Indented));
+            
+            // Commit and push the changes.
+            await gitProcess.RunCommandAsync($"git commit -am \"{gitConfiguration.CommitMessage ?? "Update from Roblox Studio."}\"");
+            // TODO: Remove hard-coded "origin" remote.
+            await gitProcess.RunCommandAsync($"push origin HEAD:\"{gitConfiguration.PushBranch}\"");
         }
         catch (KeyNotFoundException)
         {

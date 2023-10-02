@@ -13,6 +13,11 @@ public class Manifest
         /// Branch to push to the remote when pushing from Roblox Studio.
         /// </summary>
         public string PushBranch { get; set; } = null!;
+        
+        /// <summary>
+        /// Override commit message when commiting changes from Roblox Studio.
+        /// </summary>
+        public string? CommitMessage { get; set; }
     }
     
     /// <summary>
