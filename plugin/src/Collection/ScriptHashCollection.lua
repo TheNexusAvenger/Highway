@@ -6,20 +6,11 @@ Stores the hashes of scripts.
 --!strict
 
 local SHA256 = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("SHA256"))
+local Types = require(script.Parent.Parent:WaitForChild("Types"))
 
 local ScriptHashCollection = {}
 ScriptHashCollection.__index = ScriptHashCollection
 
-export type ScriptHashCollection = {
-    GetScriptPath: (Script: Instance) -> (string),
-    FindInstances: (Path: string, Parent: Instance?) -> ({Instance}),
-    FindScript: (Path: string, Parent: Instance?) -> (LuaSourceContainer?),
-
-    new: () -> (ScriptHashCollection),
-    Hashes: {[string]: string},
-    AddScript: (self: ScriptHashCollection, Script: Script | LocalScript | ModuleScript) -> (),
-    AddScripts: (self: ScriptHashCollection, Container: Instance) -> (),
-}
 
 --[[
 Returns the path for a script.
@@ -116,17 +107,17 @@ end
 --[[
 Creates a ScriptHashCollection instance.
 --]]
-function ScriptHashCollection.new(): ScriptHashCollection
+function ScriptHashCollection.new(): Types.ScriptHashCollection
     return (setmetatable({
         Hashes = {},
-    }, ScriptHashCollection) :: any) :: ScriptHashCollection
+    }, ScriptHashCollection) :: any) :: Types.ScriptHashCollection
 end
 
 --[[
 Adds a script hash.
 --]]
 function ScriptHashCollection:AddScript(Script: Script | LocalScript | ModuleScript): ()
-    self.Hashes[ScriptHashCollection.GetScriptPath(Script)] = SHA256(Script.Source)
+    self.Hashes[Script] = SHA256(Script.Source)
 end
 
 --[[
@@ -139,6 +130,23 @@ function ScriptHashCollection:AddScripts(Container: Instance): ()
     end
 end
 
+--[[
+Creates a JSON body object for HTTP requests.
+--]]
+function ScriptHashCollection:ToJson(): Types.ScriptHashCollectionJson
+    --Store the hashes.
+    local Hashes = {}
+    for Script, Hash in self.Hashes do
+        Hashes[self.GetScriptPath(Script)] = Hash
+    end
+
+    --Return the object.
+    return {
+        hashMethod = "SHA256",
+        hashes = Hashes,
+    }
+end
 
 
-return (ScriptHashCollection :: any) :: ScriptHashCollection
+
+return (ScriptHashCollection :: any) :: Types.ScriptHashCollection

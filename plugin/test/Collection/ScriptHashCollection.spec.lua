@@ -157,9 +157,12 @@ return function()
             ChildScript.Parent = ParentScript1
 
             Collection:AddScripts(Folder1)
-            expect(Collection.Hashes).to.deepEqual({
-                ["Folder1/Folder2/TestScript1/init.lua"] = "0f91b5c398faf5a579ac42ec5096962c9d320438816d1c2d5df8f2e737e96dc2",
-                ["Folder1/Folder2/TestScript1/TestScript2.lua"] = "11319e8661d9663c48c20f45450f282f2dff04d094a6ab34fe7c5dbdff9d6cee",
+            expect(Collection:ToJson()).to.deepEqual({
+                hashMethod = "SHA256",
+                hashes = {
+                    ["Folder1/Folder2/TestScript1/init.lua"] = "0f91b5c398faf5a579ac42ec5096962c9d320438816d1c2d5df8f2e737e96dc2",
+                    ["Folder1/Folder2/TestScript1/TestScript2.lua"] = "11319e8661d9663c48c20f45450f282f2dff04d094a6ab34fe7c5dbdff9d6cee",
+                },
             })
         end)
     end)
