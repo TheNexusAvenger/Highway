@@ -165,17 +165,49 @@ public class PushController : ControllerBase
             // Prepare the git branch.
             var gitProcess = await GitProcess.GetCurrentProcess().ForkAsync();
             var gitConfiguration = FileUtil.Get<Manifest>(FileUtil.FindFileInParent(FileUtil.ProjectFileName))!.Git;
-            await gitProcess.RunCommandAsync("fetch");
-            await gitProcess.RunCommandAsync($"checkout \"{gitConfiguration.CheckoutBranch}\"");
+            var fetchReturnCode = await gitProcess.RunCommandAsync("fetch");
+            if (fetchReturnCode != 0)
+            {
+                return new BaseResponse()
+                {
+                    Status = "PushFetchError",
+                    Message = $"Performing \"git fetch\" on the forked git process failed with non-zero return code {fetchReturnCode}",
+                }.ToObjectResult(500);
+            }
+            var checkoutReturnCode = await gitProcess.RunCommandAsync($"checkout \"{gitConfiguration.CheckoutBranch}\"");
+            if (checkoutReturnCode != 0)
+            {
+                return new BaseResponse()
+                {
+                    Status = "PushCheckoutError",
+                    Message = $"Performing \"git checkout \"{gitConfiguration.CheckoutBranch}\" on the forked git process failed with non-zero return code {checkoutReturnCode}",
+                }.ToObjectResult(500);
+            }
             
             // Update the files.
             // TODO: Apply changes (update files + delete old ones).
             await System.IO.File.WriteAllTextAsync(Path.Combine(gitProcess.GitPath, FileUtil.HashesFileName), JsonConvert.SerializeObject(session.ScriptHashCollection, Formatting.Indented));
             
             // Commit and push the changes.
-            await gitProcess.RunCommandAsync($"commit -am \"{gitConfiguration.CommitMessage ?? "Update from Roblox Studio."}\"");
+            var commitReturnCode = await gitProcess.RunCommandAsync($"commit -am \"{gitConfiguration.CommitMessage ?? "Update from Roblox Studio."}\"");
+            if (commitReturnCode != 0)
+            {
+                return new BaseResponse()
+                {
+                    Status = "PushCommitError",
+                    Message = $"Performing \"git commit\" on the forked git process failed with non-zero return code {commitReturnCode}",
+                }.ToObjectResult(500);
+            }
             // TODO: Remove hard-coded "origin" remote.
-            await gitProcess.RunCommandAsync($"push origin HEAD:\"{gitConfiguration.PushBranch}\"");
+            var pushReturnCode = await gitProcess.RunCommandAsync($"push origin HEAD:\"{gitConfiguration.PushBranch}\"");
+            if (pushReturnCode != 0)
+            {
+                return new BaseResponse()
+                {
+                    Status = "PushCommitError",
+                    Message = $"Performing \"git push origin HEAD:{gitConfiguration.PushBranch}\" on the forked git process failed with non-zero return code {pushReturnCode}",
+                }.ToObjectResult(500);
+            }
         }
         catch (KeyNotFoundException)
         {
