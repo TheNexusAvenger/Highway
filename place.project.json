@@ -7,6 +7,12 @@
             "HighwayPlugin": {
                 "$path": "."
             }
+        },
+        "TestService": {
+            "$className": "TestService",
+            "HighwayPluginTest": {
+                "$path": "plugin/test"
+            }
         }
     }
 }
