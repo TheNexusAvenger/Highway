@@ -1,4 +1,6 @@
-﻿namespace Highway.Server.Model.State;
+﻿using Highway.Server.Util;
+
+namespace Highway.Server.Model.State;
 
 public class ScriptHashCollection
 {
@@ -12,4 +14,32 @@ public class ScriptHashCollection
     /// Current hashes of the script contents in Roblox Studio.
     /// </summary>
     public Dictionary<string, string>? Hashes { get; set; } = new Dictionary<string, string>();
+
+    /// <summary>
+    /// Adds file or directory tot he hash collection.
+    /// </summary>
+    /// <param name="baseScriptPath">Base script path to add.</param>
+    /// <param name="baseDirectoryPath">Directory of the file or directory to add.</param>
+    public void AddFileHashes(string baseScriptPath, string baseDirectoryPath)
+    {
+        var fileName = Path.GetFileName(baseDirectoryPath);
+        var scriptPath = baseScriptPath + (baseScriptPath.EndsWith("/") ? "" : "/") + fileName;
+        if (Directory.Exists(baseDirectoryPath))
+        {
+            // Add the files and directories in the directory.
+            foreach (var child in Directory.GetDirectories(baseDirectoryPath))
+            {
+                this.AddFileHashes(scriptPath, child);
+            }
+            foreach (var child in Directory.GetFiles(baseDirectoryPath))
+            {
+                this.AddFileHashes(scriptPath, child);
+            }
+        }
+        else if (File.Exists(baseDirectoryPath))
+        {
+            // Add the file.
+            this.Hashes![scriptPath] = HashUtil.GetHash(File.ReadAllText(baseDirectoryPath));
+        }
+    }
 }
