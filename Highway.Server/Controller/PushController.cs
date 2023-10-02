@@ -6,7 +6,6 @@ using Highway.Server.Model.State;
 using Highway.Server.State;
 using Highway.Server.Util;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace Highway.Server.Controller;
 
@@ -160,11 +159,12 @@ public class PushController : ControllerBase
         try
         {
             // Complete the session.
-            var rootScriptInstance = session.Complete();
+            session.Complete();
             
             // Prepare the git branch.
             var gitProcess = await GitProcess.GetCurrentProcess().ForkAsync();
-            var gitConfiguration = FileUtil.Get<Manifest>(FileUtil.FindFileInParent(FileUtil.ProjectFileName))!.Git;
+            var configuration = FileUtil.Get<Manifest>(FileUtil.FindFileInParent(FileUtil.ProjectFileName))!;
+            var gitConfiguration = configuration.Git;
             var fetchReturnCode = await gitProcess.RunCommandAsync("fetch");
             if (fetchReturnCode != 0)
             {
@@ -185,8 +185,7 @@ public class PushController : ControllerBase
             }
             
             // Update the files.
-            // TODO: Apply changes (update files + delete old ones).
-            await System.IO.File.WriteAllTextAsync(Path.Combine(gitProcess.GitPath, FileUtil.HashesFileName), JsonConvert.SerializeObject(session.ScriptHashCollection, Formatting.Indented));
+            await session.WriteFilesAsync(gitProcess.GitPath, configuration.Paths);
             
             // Commit and push the changes.
             var commitReturnCode = await gitProcess.RunCommandAsync($"commit -am \"{gitConfiguration.CommitMessage ?? "Update from Roblox Studio."}\"");

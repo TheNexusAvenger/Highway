@@ -1,6 +1,7 @@
 ﻿using System.Security;
 using Highway.Server.Model.State;
 using Highway.Server.Util;
+using Newtonsoft.Json;
 
 namespace Highway.Server.State;
 
@@ -85,11 +86,10 @@ public class PushSession
     }
 
     /// <summary>
-    /// Completes the session and builds the script instance tree for the scripts.
+    /// Completes the session and removes it from the active sessions.
     /// </summary>
-    /// <returns>the instance tree for the scripts.</returns>
     /// <exception cref="KeyNotFoundException">At least one script source was not sent.</exception>
-    public ScriptInstance Complete()
+    public void Complete()
     {
         // Remove the session.
         Sessions.Remove(this.Id);
@@ -100,13 +100,51 @@ public class PushSession
         {
             throw new KeyNotFoundException("At least one script source was not sent when the hash was given");
         }
-        
-        // Create and return the instances.
-        var rootInstance = new ScriptInstance();
-        foreach (var (path, source) in this.Scripts)
+    }
+
+    public async Task WriteFilesAsync(string parentDirectory, Dictionary<string, string> paths)
+    {
+        // Remove old files not stored in the new hash collection.
+        // Empty folders aren't cleared since they will not be saved by git.
+        var hashesFilePath = Path.Combine(parentDirectory, FileUtil.HashesFileName);
+        if (File.Exists(hashesFilePath))
         {
-            rootInstance.AddScript(path, source);
+            var previousHashes = JsonConvert.DeserializeObject<ScriptHashCollection>(await File.ReadAllTextAsync(hashesFilePath))!;
+            foreach (var (scriptPath, _) in previousHashes.Hashes!)
+            {
+                if (this.ScriptHashCollection.Hashes!.ContainsKey(scriptPath));
+                var scriptFilePath = GetPath(scriptPath, parentDirectory, paths);
+                if (scriptFilePath == null || !File.Exists(scriptFilePath)) continue;
+                File.Delete(scriptFilePath);
+            }
         }
-        return rootInstance;
+        
+        // Write the new files.
+        foreach (var (scriptPath, scriptContents) in this.Scripts)
+        {
+            var scriptFilePath = GetPath(scriptPath, parentDirectory, paths);
+            if (scriptFilePath == null) continue;
+            Directory.CreateDirectory(Directory.GetParent(scriptFilePath)!.FullName);
+            await File.WriteAllTextAsync(scriptFilePath, scriptContents);
+        }
+        
+        // Write the hash file.
+        await File.WriteAllTextAsync(hashesFilePath, JsonConvert.SerializeObject(this.ScriptHashCollection, Formatting.Indented));
+    }
+
+    private string? GetPath(string scriptPath, string parentDirectory, Dictionary<string, string> paths)
+    {
+        // Determine the longest file path that matches the script path.
+        string? baseScriptPath = null;
+        foreach (var (newBaseScriptPath, _) in paths)
+        {
+            if (!scriptPath.StartsWith(newBaseScriptPath.Replace('.', '/'))) continue;
+            if (baseScriptPath != null && baseScriptPath.Length > newBaseScriptPath.Length) continue;
+            baseScriptPath = newBaseScriptPath;
+        }
+        
+        // Return the path.
+        if (baseScriptPath == null) return null;
+        return Path.Combine(parentDirectory, paths[baseScriptPath], scriptPath.Replace(baseScriptPath.Replace('.', '/') + "/", ""));
     }
 }
