@@ -180,9 +180,9 @@ public class PushController : ControllerBase
         {
             return new BaseResponse()
             {
-                Status = "ScriptNotFound",
-                Message = $"The script was not sent in the hash collection when creating the session.",
-            }.ToObjectResult(404);
+                Status = "SessionIncomplete",
+                Message = $"At least 1 script was not added to the session.",
+            }.ToObjectResult(400);
         }
 
         // Return success.
