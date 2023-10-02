@@ -67,7 +67,7 @@ public class PushSession
     public void Add(string path, string source)
     {
         // Throw an exception if the script does not have a hash.
-        if (!this.ScriptHashCollection.Hashes.ContainsKey(path))
+        if (!this.ScriptHashCollection.Hashes!.ContainsKey(path))
         {
             throw new KeyNotFoundException($"Script path has no stored hash: {path}");
         }
@@ -96,7 +96,7 @@ public class PushSession
         
         // Throw an exception if the session is incomplete.
         // Because Add throws exceptions for extra scripts, checking for missing is all that is required.
-        if (this.Scripts.Count < this.ScriptHashCollection.Hashes.Count)
+        if (this.Scripts.Count < this.ScriptHashCollection.Hashes!.Count)
         {
             throw new KeyNotFoundException("At least one script source was not sent when the hash was given");
         }

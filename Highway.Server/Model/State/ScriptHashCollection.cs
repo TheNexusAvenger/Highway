@@ -11,5 +11,5 @@ public class ScriptHashCollection
     /// <summary>
     /// Current hashes of the script contents in Roblox Studio.
     /// </summary>
-    public Dictionary<string, string> Hashes { get; set; } = new Dictionary<string, string>();
+    public Dictionary<string, string>? Hashes { get; set; } = new Dictionary<string, string>();
 }

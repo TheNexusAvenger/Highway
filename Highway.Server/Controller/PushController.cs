@@ -14,8 +14,26 @@ public class PushController : ControllerBase
 {
     [HttpPost]
     [Route("/push/session/start")]
-    public ObjectResult PostStartSession([FromBody] ScriptHashCollection hashCollection)
+    public ObjectResult PostStartSession([FromBody] ScriptHashCollection? hashCollection)
     {
+        // Return if there is a request issue.
+        if (hashCollection == null)
+        {
+            return new BaseResponse()
+            {
+                Status = "MissingBody",
+                Message = "Body was not sent or could not be parsed.",
+            }.ToObjectResult(400);
+        }
+        if (hashCollection.Hashes == null)
+        {
+            return new BaseResponse()
+            {
+                Status = "MissingField",
+                Message = "Missing \"hashes\" field.",
+            }.ToObjectResult(400);
+        }
+        
         // Start the session.
         var session = PushSession.Create(hashCollection);
 
@@ -29,9 +47,17 @@ public class PushController : ControllerBase
     
     [HttpPost]
     [Route("/push/session/add")]
-    public ObjectResult PostAddScript([FromBody] PushAddScriptRequest addScriptRequest)
+    public ObjectResult PostAddScript([FromBody] PushAddScriptRequest? addScriptRequest)
     {
         // Return if there is a request issue.
+        if (addScriptRequest == null)
+        {
+            return new BaseResponse()
+            {
+                Status = "MissingBody",
+                Message = "Body was not sent or could not be parsed.",
+            }.ToObjectResult(400);
+        }
         if (addScriptRequest.Session == null)
         {
             return new BaseResponse()
@@ -99,9 +125,17 @@ public class PushController : ControllerBase
     
     [HttpPost]
     [Route("/push/session/complete")]
-    public async Task<ObjectResult> PostCompleteSession([FromBody] PushCompleteRequest completeRequest)
+    public async Task<ObjectResult> PostCompleteSession([FromBody] PushCompleteRequest? completeRequest)
     {
         // Return if there is a request issue.
+        if (completeRequest == null)
+        {
+            return new BaseResponse()
+            {
+                Status = "MissingBody",
+                Message = "Body was not sent or could not be parsed.",
+            }.ToObjectResult(400);
+        }
         if (completeRequest.Session == null)
         {
             return new BaseResponse()
