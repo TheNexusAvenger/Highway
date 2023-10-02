@@ -22,4 +22,22 @@ export type ScriptHashCollectionJson = {
     hashes: {[string]: string},
 }
 
+--Respones
+export type ProjectManifest = {
+    Name: string?,
+    PushPlaceId: number?,
+    SyncPlaceId: number?,
+    Git: {
+        CheckoutBranch: string,
+        PushBranch: string,
+        CommitMessage: string?,
+    },
+    Paths: {[string]: string},
+}
+
+export type FileHashes = {
+    HashMethod: string,
+    Hashes: {[string]: string},
+}
+
 return {}
