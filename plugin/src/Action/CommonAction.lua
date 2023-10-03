@@ -57,7 +57,7 @@ function CommonAction:PerformAndParseRequest(Method: string, Url: string, Body: 
     local Response = self:PerformRequest(Method, Url, Body)
     Response.Body = HttpService:JSONDecode(Response.Body)
     if not Response.Success then
-        error("HTTP "..tostring(Response.StatusCode).." - "..tostring(Response.Body.status))
+        error("HTTP "..tostring(Response.StatusCode).." - "..tostring(Response.Body.status)..": "..tostring(Response.Body.message))
     end
     return Response
 end
@@ -68,15 +68,15 @@ Fetches the current project configuration.
 function CommonAction:GetProjectManifest(): Types.ProjectManifest
     local Response = self:PerformAndParseRequest("GET", "/project/manifest").Body["manifest"]
     return {
-        Name = Response["name"],
-        PushPlaceId = Response["pushPlaceId"],
-        SyncPlaceId = Response["syncPlaceId"],
+        Name = Response.name,
+        PushPlaceId = Response.pushPlaceId,
+        SyncPlaceId = Response.syncPlaceId,
         Git = {
-            CheckoutBranch = Response["git"]["checkoutBranch"],
-            PushBranch = Response["git"]["pushBranch"],
-            CommitMessage = Response["git"]["commitMessage"],
+            CheckoutBranch = Response.git.checkoutBranch,
+            PushBranch = Response.git.pushBranch,
+            CommitMessage = Response.git.commitMessage,
         },
-        Paths = Response["paths"],
+        Paths = Response.paths,
     }
 end
 
@@ -86,8 +86,8 @@ Fetches the current hashes of the file system.
 function CommonAction:GetFileHashes(): Types.FileHashes
     local Response = self:PerformAndParseRequest("GET", "/file/list/hashes").Body["hashes"]
     return {
-        HashMethod = Response["hashMethod"],
-        Hashes = Response["hashes"],
+        HashMethod = Response.hashMethod,
+        Hashes = Response.hashes,
     }
 end
 

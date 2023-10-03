@@ -188,7 +188,8 @@ public class PushController : ControllerBase
             await session.WriteFilesAsync(gitProcess.GitPath, configuration);
             
             // Commit and push the changes.
-            var commitReturnCode = await gitProcess.RunCommandAsync($"commit -am \"{gitConfiguration.CommitMessage ?? "Update from Roblox Studio."}\"");
+            await gitProcess.RunCommandAsync("add .");
+            var commitReturnCode = await gitProcess.RunCommandAsync($"commit -m \"{gitConfiguration.CommitMessage ?? "Update from Roblox Studio."}\"");
             if (commitReturnCode != 0)
             {
                 return new BaseResponse()
@@ -203,7 +204,7 @@ public class PushController : ControllerBase
             {
                 return new BaseResponse()
                 {
-                    Status = "PushCommitError",
+                    Status = "PushError",
                     Message = $"Performing \"git push origin HEAD:{gitConfiguration.PushBranch}\" on the forked git process failed with non-zero return code {pushReturnCode}",
                 }.ToObjectResult(500);
             }

@@ -117,7 +117,8 @@ end
 Adds a script hash.
 --]]
 function ScriptHashCollection:AddScript(Script: Script | LocalScript | ModuleScript): ()
-    self.Hashes[Script] = SHA256(Script.Source)
+    local Source, _ = string.gsub(Script.Source, "\r", "")
+    self.Hashes[Script] = SHA256(Source)
 end
 
 --[[
