@@ -64,6 +64,29 @@ public class Manifest
         
         // Return the path.
         if (baseScriptPath == null) return null;
-        return Path.Combine(parentDirectory, this.Paths[baseScriptPath], scriptPath.Replace(baseScriptPath.Replace('.', '/') + "/", ""));
+        return Path.GetFullPath(Path.Combine(parentDirectory, this.Paths[baseScriptPath], scriptPath.Replace(baseScriptPath.Replace('.', '/') + "/", "")));
+    }
+
+    /// <summary>
+    /// Determines the script path for a file system path.
+    /// </summary>
+    /// <param name="parentDirectory">Parent directory to base the manifest off of.</param>
+    /// <param name="path">Path of the file. Must be an absolute path.</param>
+    /// <returns>Script path of the file, if any.</returns>
+    public string? GetScriptPathForPath(string parentDirectory,string path)
+    {
+        foreach (var (baseScriptPath, baseFilePath) in this.Paths)
+        {
+            var fullBaseFilePath = Path.GetFullPath(Path.Combine(parentDirectory, baseFilePath));
+            if (!path.StartsWith(fullBaseFilePath)) continue;
+            if (!fullBaseFilePath.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            {
+                fullBaseFilePath += Path.DirectorySeparatorChar;
+            }
+            var remainingPath = path.Substring(fullBaseFilePath.Length).Replace(Path.DirectorySeparatorChar, '/');
+            var scriptPath = baseScriptPath.Replace('.', '/') + "/" + remainingPath;
+            return scriptPath;
+        }
+        return null;
     }
 }

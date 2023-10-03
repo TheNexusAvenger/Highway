@@ -41,6 +41,15 @@ public static class FileUtil
     }
 
     /// <summary>
+    /// Returns the project directory (contains the project file).
+    /// </summary>
+    /// <returns>The current project directory.</returns>
+    public static string? GetProjectDirectory()
+    {
+        return GetParentDirectoryOf(ProjectFileName);
+    }
+
+    /// <summary>
     /// Find a file or directory in the current working directory or parent.
     /// Returns null if the file/directory does not exist.
     /// </summary>
