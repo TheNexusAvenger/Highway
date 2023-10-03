@@ -12,6 +12,7 @@ public static class HashUtil
     /// <returns>Result of the hash.</returns>
     public static string GetHash(string input)
     {
-        return Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(input)));
+        input = input.Replace("\r", "");
+        return BitConverter.ToString(SHA256.HashData(Encoding.UTF8.GetBytes(input))).Replace("-", "").ToLower();
     }
 }
