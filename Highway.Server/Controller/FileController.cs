@@ -98,7 +98,7 @@ public class FileController : ControllerBase
         // Return the script contents.
         return new FileReadResponse()
         {
-            Contents = System.IO.File.ReadAllText(path),
+            Contents = System.IO.File.ReadAllText(scriptFilePath),
         }.ToObjectResult(200);
     }
 }
