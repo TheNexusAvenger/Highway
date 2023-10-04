@@ -80,6 +80,50 @@ return function()
         end)
     end)
 
+    describe("The GetInstancePath helper method", function()
+        it("should return nil for unknown extensions.", function()
+            local Path, ScriptType = PathUtil.GetInstancePath("Path1/Path2/Path3.cs")
+            expect(Path).to.equal(nil)
+            expect(ScriptType).to.equal(nil)
+        end)
+
+        it("should return for .lua extensions.", function()
+            local Path, ScriptType = PathUtil.GetInstancePath("Path1/Path2/Path3.lua")
+            expect(Path).to.equal("Path1/Path2/Path3")
+            expect(ScriptType).to.equal("ModuleScript")
+        end)
+
+        it("should return for .server.lua extensions.", function()
+            local Path, ScriptType = PathUtil.GetInstancePath("Path1/Path2/Path3.server.lua")
+            expect(Path).to.equal("Path1/Path2/Path3")
+            expect(ScriptType).to.equal("Script")
+        end)
+
+        it("should return for .client.lua extensions.", function()
+            local Path, ScriptType = PathUtil.GetInstancePath("Path1/Path2/Path3.client.lua")
+            expect(Path).to.equal("Path1/Path2/Path3")
+            expect(ScriptType).to.equal("LocalScript")
+        end)
+
+        it("should return for init.lua extensions.", function()
+            local Path, ScriptType = PathUtil.GetInstancePath("Path1/Path2/Path3/init.lua")
+            expect(Path).to.equal("Path1/Path2/Path3")
+            expect(ScriptType).to.equal("ModuleScript")
+        end)
+
+        it("should return for init.server.lua extensions.", function()
+            local Path, ScriptType = PathUtil.GetInstancePath("Path1/Path2/Path3/init.server.lua")
+            expect(Path).to.equal("Path1/Path2/Path3")
+            expect(ScriptType).to.equal("Script")
+        end)
+
+        it("should return for init.client.lua extensions.", function()
+            local Path, ScriptType = PathUtil.GetInstancePath("Path1/Path2/Path3/init.client.lua")
+            expect(Path).to.equal("Path1/Path2/Path3")
+            expect(ScriptType).to.equal("LocalScript")
+        end)
+    end)
+
     describe("The FindInstances and FindScript helper methods", function()
         local Parent = nil
         local Script1, Script2, Script3, Script4 = nil, nil, nil, nil

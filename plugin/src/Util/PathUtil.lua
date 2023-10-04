@@ -45,6 +45,34 @@ function PathUtil.GetScriptPath(Script: Instance): string
 end
 
 --[[
+Returns the instance path and type for a script path.
+--]]
+function PathUtil.GetInstancePath(Path: string): (string?, string?)
+    --Determine the type.
+    local Extension, ScriptType = nil, nil
+    if string.find(string.lower(Path), "%.server%.lua$") then
+        Extension = ".server.lua"
+        ScriptType = "Script"
+    elseif string.find(string.lower(Path), "%.client%.lua$") then
+        Extension = ".client.lua"
+        ScriptType = "LocalScript"
+    elseif string.find(string.lower(Path), "%.lua$") then
+        Extension = ".lua"
+        ScriptType = "ModuleScript"
+    end
+    if not ScriptType then return nil, nil end
+
+    --Convert the script path to an instance path.
+    Path = string.sub(Path, 1, string.len(Path) - string.len(Extension))
+    if string.find(Path, "/init$") then
+        Path = string.sub(Path, 1, string.len(Path) - 5)
+    end
+
+    --Return the path and type.
+    return Path, ScriptType
+end
+
+--[[
 Finds all the instances for the given path.
 --]]
 function PathUtil.FindInstances(Path: string, Parent: Instance?): {Instance}
@@ -73,28 +101,12 @@ Attempts to find a script given a path.
 Returns nil if the instances does not exist or is not a script.
 --]]
 function PathUtil.FindScript(Path: string, Parent: Instance?): LuaSourceContainer?
-    --Determine the type.
-    local Extension, ScriptType = nil, nil
-    if string.find(string.lower(Path), "%.server%.lua$") then
-        Extension = ".server.lua"
-        ScriptType = "Script"
-    elseif string.find(string.lower(Path), "%.client%.lua$") then
-        Extension = ".client.lua"
-        ScriptType = "LocalScript"
-    elseif string.find(string.lower(Path), "%.lua$") then
-        Extension = ".lua"
-        ScriptType = "ModuleScript"
-    end
-    if not ScriptType then return nil end
-
-    --Convert the script path to an instance path.
-    Path = string.sub(Path, 1, string.len(Path) - string.len(Extension))
-    if string.find(Path, "/init$") then
-        Path = string.sub(Path, 1, string.len(Path) - 5)
-    end
+    --Get the instance path and type.
+    local NewPath, ScriptType = PathUtil.GetInstancePath(Path)
+    if not NewPath then return nil end
 
     --Return the first instance that matches the type.
-    for _, Child in PathUtil.FindInstances(Path, Parent) do
+    for _, Child in PathUtil.FindInstances(NewPath, Parent) do
         if Child.ClassName ~= ScriptType then continue end
         return Child :: LuaSourceContainer
     end
