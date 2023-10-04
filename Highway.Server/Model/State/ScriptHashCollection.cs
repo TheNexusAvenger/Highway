@@ -20,20 +20,21 @@ public class ScriptHashCollection
     /// </summary>
     /// <param name="baseScriptPath">Base script path to add.</param>
     /// <param name="baseDirectoryPath">Directory of the file or directory to add.</param>
-    public void AddFileHashes(string baseScriptPath, string baseDirectoryPath)
+    /// <param name="firstStep">Makes it so the directory is not added to the path. Only meant for the first call.</param>
+    public void AddFileHashes(string baseScriptPath, string baseDirectoryPath, bool firstStep = true)
     {
         var fileName = Path.GetFileName(baseDirectoryPath);
-        var scriptPath = baseScriptPath + (baseScriptPath.EndsWith("/") ? "" : "/") + fileName;
+        var scriptPath = (firstStep ? baseScriptPath : baseScriptPath + (baseScriptPath.EndsWith("/") ? "" : "/") + fileName);
         if (Directory.Exists(baseDirectoryPath))
         {
             // Add the files and directories in the directory.
             foreach (var child in Directory.GetDirectories(baseDirectoryPath))
             {
-                this.AddFileHashes(scriptPath, child);
+                this.AddFileHashes(scriptPath, child, false);
             }
             foreach (var child in Directory.GetFiles(baseDirectoryPath))
             {
-                this.AddFileHashes(scriptPath, child);
+                this.AddFileHashes(scriptPath, child, false);
             }
         }
         else if (File.Exists(baseDirectoryPath))
