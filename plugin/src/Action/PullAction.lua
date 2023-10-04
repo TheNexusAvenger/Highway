@@ -9,6 +9,7 @@ local ScriptEditorService = game:GetService("ScriptEditorService")
 
 local CommonAction = require(script.Parent:WaitForChild("CommonAction"))
 local ScriptHashCollection = require(script.Parent.Parent:WaitForChild("Collection"):WaitForChild("ScriptHashCollection"))
+local PathUtil = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("PathUtil"))
 local Types = require(script.Parent.Parent:WaitForChild("Types"))
 
 local PullAction = {}
@@ -48,7 +49,7 @@ function PullAction:CalculateHashDifferences(): ()
     local SystemHashes = (self:GetFileHashes() :: Types.FileHashes).Hashes
     local StudioHashes = {}
     for Script, Hash in ScriptHashCollection.FromManifest(self:GetProjectManifest()).Hashes do
-        StudioHashes[ScriptHashCollection.GetScriptPath(Script)] = Hash
+        StudioHashes[PathUtil.GetScriptPath(Script)] = Hash
     end
     for ScriptPath, SystemHash in SystemHashes do
         local StudioHash = StudioHashes[ScriptPath]
@@ -87,9 +88,9 @@ function PullAction:ApplyDifferences(Parent: Instance?): ()
     for ScriptPath, HashDifference in self.HashDifferences do
         if HashDifference.New and HashDifference.Old then
             --Update the script.
-            local ExistingScript = ScriptHashCollection.FindScript(ScriptPath)
+            local ExistingScript = PathUtil.FindScript(ScriptPath)
             if ExistingScript then
-                ScriptEditorService:UpdateSourceAsync(ScriptHashCollection.FindScript(ScriptPath), function()
+                ScriptEditorService:UpdateSourceAsync(PathUtil.FindScript(ScriptPath), function()
                     return NewSources[ScriptPath]
                 end)
             end
@@ -150,7 +151,7 @@ function PullAction:ApplyDifferences(Parent: Instance?): ()
             end
         else
             --Unparent children from the script and clear the script.
-            local ExistingScript = ScriptHashCollection.FindScript(ScriptPath)
+            local ExistingScript = PathUtil.FindScript(ScriptPath)
             if ExistingScript then
                 if #ExistingScript:GetChildren() > 0 then
                     local NewFolder = Instance.new("Folder")

@@ -7,6 +7,7 @@ Action for pushing files out of Roblox Studio.
 
 local CommonAction = require(script.Parent:WaitForChild("CommonAction"))
 local ScriptHashCollection = require(script.Parent.Parent:WaitForChild("Collection"):WaitForChild("ScriptHashCollection"))
+local PathUtil = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("PathUtil"))
 local Types = require(script.Parent.Parent:WaitForChild("Types"))
 
 local PushAction = {}
@@ -52,7 +53,7 @@ function PushAction:PushScripts(ProgressCallback: (string, number) -> ()): ()
         ProgressCallback("Preparing scripts ("..tostring(i).."/"..tostring(#ScriptsToPush)..")", i / #ScriptsToPush)
         self:PerformAndParseRequest("POST", "/push/session/add", {
             session = PushSessionId,
-            scriptPath = ScriptHashCollection.GetScriptPath(Script),
+            scriptPath = PathUtil.GetScriptPath(Script),
             contents = Script.Source,
         } :: any)
     end

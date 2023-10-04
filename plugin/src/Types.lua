@@ -6,10 +6,6 @@ Types used by the plugin.
 
 --Classes
 export type ScriptHashCollection = {
-    GetScriptPath: (Script: Instance) -> (string),
-    FindInstances: (Path: string, Parent: Instance?) -> ({Instance}),
-    FindScript: (Path: string, Parent: Instance?) -> (LuaSourceContainer?),
-
     new: () -> (ScriptHashCollection),
     FromManifest: (Manifest: ProjectManifest) -> (ScriptHashCollection),
     Hashes: {[Instance]: string},
