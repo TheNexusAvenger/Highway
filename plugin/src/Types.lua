@@ -11,9 +11,11 @@ export type ScriptHashCollection = {
     FindScript: (Path: string, Parent: Instance?) -> (LuaSourceContainer?),
 
     new: () -> (ScriptHashCollection),
+    FromManifest: (Manifest: ProjectManifest) -> (ScriptHashCollection),
     Hashes: {[Instance]: string},
     AddScript: (self: ScriptHashCollection, Script: Script | LocalScript | ModuleScript) -> (),
     AddScripts: (self: ScriptHashCollection, Container: Instance) -> (),
+    ToJson: (self: ScriptHashCollection) -> (ScriptHashCollectionJson),
 }
 
 --Requests

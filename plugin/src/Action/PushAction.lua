@@ -30,20 +30,8 @@ function PushAction.new(): PushAction
     local self = CommonAction.new() :: any
     setmetatable(self, PushAction)
     self.Manifest = self:GetProjectManifest()
-    self.ScriptHashCollection = ScriptHashCollection.new()
+    self.ScriptHashCollection = ScriptHashCollection.FromManifest(self.Manifest)
     return self :: PushAction
-end
-
---[[
-Adds all the scripts to the hash collection.
---]]
-function PushAction:AddScripts(): ()
-    for Path, _ in self.Manifest.Paths do
-        local NewPath, _ = string.gsub(Path, "%.", "/")
-        for _, Container in self.ScriptHashCollection.FindInstances(NewPath) do
-            self.ScriptHashCollection:AddScripts(Container)
-        end
-    end
 end
 
 --[[
