@@ -38,7 +38,7 @@ end
 --[[
 Pushes the scripts to the remote.
 --]]
-function PushAction:PushScripts(ProgressCallback: (string, number) -> ()): ()
+function PushAction:PushScripts(CheckoutBranch: string, PushBranch: string, CommitMessage: string, ProgressCallback: (string, number) -> ()): ()
     --Get the scripts to push.
     local ScriptsToPush = {}
     for Script, _ in self.ScriptHashCollection.Hashes do
@@ -62,6 +62,9 @@ function PushAction:PushScripts(ProgressCallback: (string, number) -> ()): ()
     ProgressCallback("Pushing changes", 1)
     self:PerformAndParseRequest("POST", "/push/session/complete", {
         session = PushSessionId,
+        checkoutBranch = CheckoutBranch,
+        pushBranch = PushBranch,
+        commitMessage = CommitMessage,
     } :: any)
 end
 
