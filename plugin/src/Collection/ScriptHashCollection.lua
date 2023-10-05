@@ -5,6 +5,8 @@ Stores the hashes of scripts.
 --]]
 --!strict
 
+local ScriptEditorService = game:GetService("ScriptEditorService")
+
 local PathUtil = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("PathUtil"))
 local SHA256 = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("SHA256"))
 local Types = require(script.Parent.Parent:WaitForChild("Types"))
@@ -39,8 +41,8 @@ end
 --[[
 Adds a script hash.
 --]]
-function ScriptHashCollection:AddScript(Script: Script | LocalScript | ModuleScript): ()
-    local Source, _ = string.gsub(Script.Source, "\r", "")
+function ScriptHashCollection:AddScript(Script: LuaSourceContainer): ()
+    local Source, _ = string.gsub(ScriptEditorService:GetEditorSource(Script), "\r", "")
     self.Hashes[Script] = SHA256(Source)
 end
 
@@ -50,7 +52,7 @@ Adds a container of scripts.
 function ScriptHashCollection:AddScripts(Container: Instance): ()
     for _, Child in Container:GetDescendants() do
         if not Child:IsA("LuaSourceContainer") then continue end
-        self:AddScript(Child :: any)
+        self:AddScript(Child)
     end
 end
 

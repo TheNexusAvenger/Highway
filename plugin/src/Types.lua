@@ -9,7 +9,7 @@ export type ScriptHashCollection = {
     new: () -> (ScriptHashCollection),
     FromManifest: (Manifest: ProjectManifest) -> (ScriptHashCollection),
     Hashes: {[Instance]: string},
-    AddScript: (self: ScriptHashCollection, Script: Script | LocalScript | ModuleScript) -> (),
+    AddScript: (self: ScriptHashCollection, Script: LuaSourceContainer) -> (),
     AddScripts: (self: ScriptHashCollection, Container: Instance) -> (),
     ToJson: (self: ScriptHashCollection) -> (ScriptHashCollectionJson),
 }
