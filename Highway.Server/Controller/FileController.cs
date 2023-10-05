@@ -40,11 +40,11 @@ public class FileController : ControllerBase
         var projectDirectory = FileUtil.GetProjectDirectory()!;
         var configuration = FileUtil.Get<Manifest>(FileUtil.FindFileInParent(FileUtil.ProjectFileName))!;
         var hashCollection = new ScriptHashCollection();
-        foreach (var path in watcher.ChangedFiles)
+        foreach (var (path, type) in watcher.ChangedFiles)
         {
-            // Return a request to resync if the file does not exist.
-            // Cases of renaming or deleting files aren't handled well with the current design.
-            if ((Directory.Exists(path) && (Directory.GetFiles(path).Length > 0 || Directory.GetDirectories(path).Length > 0)) || !Path.Exists(path))
+            // Return a request to resync if the path is not a file or an existing directory.
+            // Cases of renaming or deleting directories aren't handled well with the current design.
+            if (!path.ToLower().EndsWith(".lua") && (type != DirectoryWatcher.ChangedFilePath.File || Directory.Exists(path)))
             {
                 watcher.Reset();
                 return new FileListHashesResponse()
@@ -54,10 +54,10 @@ public class FileController : ControllerBase
             }
             
             // Add the script path.
-            if (!System.IO.File.Exists(path)) continue;
             var scriptPath = configuration.GetScriptPathForPath(projectDirectory, path);
             if (scriptPath == null) continue;
-            hashCollection.Hashes!.Add(scriptPath, HashUtil.GetHash(System.IO.File.ReadAllText(path)));
+            var scriptHash = System.IO.File.Exists(path) ? HashUtil.GetHash(System.IO.File.ReadAllText(path)) : "DELETED";
+            hashCollection.Hashes!.Add(scriptPath, scriptHash);
         }
         watcher.Reset();
 

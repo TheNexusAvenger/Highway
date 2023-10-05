@@ -4,6 +4,13 @@ namespace Highway.Server.Model.State;
 
 public class DirectoryWatcher
 {
+    public enum ChangedFilePath
+    {
+        File,
+        Directory,
+        Unknown,
+    }
+
     /// <summary>
     /// Static instances of the DirectoryWatcher.
     /// </summary>
@@ -12,7 +19,7 @@ public class DirectoryWatcher
     /// <summary>
     /// Files that have changed since the last reset.
     /// </summary>
-    public readonly HashSet<string> ChangedFiles = new HashSet<string>();
+    public readonly Dictionary<string, ChangedFilePath> ChangedFiles = new Dictionary<string, ChangedFilePath>();
     
     /// <summary>
     /// File watcher for the directory.
@@ -30,7 +37,7 @@ public class DirectoryWatcher
                                                | NotifyFilters.FileName
                                                | NotifyFilters.LastWrite
                                                | NotifyFilters.Size;
-        this._fileSystemWatcher.Changed += HandleEventForFiles;
+        this._fileSystemWatcher.Changed += FileOnlyHandleEvent;
         this._fileSystemWatcher.Created += HandleEvent;
         this._fileSystemWatcher.Deleted += HandleEvent;
         this._fileSystemWatcher.Renamed += HandleEvent;
@@ -76,18 +83,29 @@ public class DirectoryWatcher
     /// <param name="e">Data of the event.</param>
     private void HandleEvent(object sender, FileSystemEventArgs e)
     {
-        this.ChangedFiles.Add(e.FullPath);
+        if (File.Exists(e.FullPath))
+        {
+            this.ChangedFiles[e.FullPath] = ChangedFilePath.File;
+        }
+        else if (Directory.Exists(e.FullPath))
+        {
+            this.ChangedFiles[e.FullPath] = ChangedFilePath.Directory;
+        }
+        else
+        {
+            this.ChangedFiles[e.FullPath] = ChangedFilePath.Unknown;
+        }
     }
 
     /// <summary>
-    /// Handles an event from a FileSystemWatcher that filters for files. 
+    /// Handles an event from a FileSystemWatcher for only files.. 
     /// </summary>
     /// <param name="sender">Sender of the event.</param>
     /// <param name="e">Data of the event.</param>
-    private void HandleEventForFiles(object sender, FileSystemEventArgs e)
+    private void FileOnlyHandleEvent(object sender, FileSystemEventArgs e)
     {
         if (!File.Exists(e.FullPath)) return;
-        this.ChangedFiles.Add(e.FullPath);
+        this.ChangedFiles[e.FullPath] = ChangedFilePath.File;
     }
 
     /// <summary>
@@ -97,7 +115,20 @@ public class DirectoryWatcher
     /// <param name="e">Data of the event.</param>
     private void HandleEvent(object sender, RenamedEventArgs e)
     {
-        this.ChangedFiles.Add(e.OldFullPath);
-        this.ChangedFiles.Add(e.FullPath);
+        if (File.Exists(e.FullPath))
+        {
+            this.ChangedFiles[e.OldFullPath] = ChangedFilePath.File;
+            this.ChangedFiles[e.FullPath] = ChangedFilePath.File;
+        }
+        else if (Directory.Exists(e.FullPath))
+        {
+            this.ChangedFiles[e.OldFullPath] = ChangedFilePath.Directory;
+            this.ChangedFiles[e.FullPath] = ChangedFilePath.Directory;
+        }
+        else
+        {
+            this.ChangedFiles[e.OldFullPath] = ChangedFilePath.Unknown;
+            this.ChangedFiles[e.FullPath] = ChangedFilePath.Unknown;
+        }
     }
 }
