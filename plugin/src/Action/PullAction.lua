@@ -80,7 +80,7 @@ function PullAction:ApplyDifferences(Parent: Instance?): ()
     local NewSources = {}
     for ScriptPath, HashDifference in self.HashDifferences do
         if not HashDifference.New then continue end
-        NewSources[ScriptPath] = self:PerformAndParseRequest("GET", "/file/read?path="..ScriptPath).Body.contents
+        NewSources[ScriptPath] = self:GetSource(ScriptPath)
     end
     
     --Apply the differences.

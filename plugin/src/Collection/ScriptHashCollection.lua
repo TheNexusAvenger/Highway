@@ -29,8 +29,7 @@ Creates a ScriptHashCollection instance for a manifest..
 function ScriptHashCollection.FromManifest(Manifest: Types.ProjectManifest): Types.ScriptHashCollection
     local Collection = ScriptHashCollection.new()
     for Path, _ in Manifest.Paths do
-        local NewPath, _ = string.gsub(Path, "%.", "/")
-        for _, Container in PathUtil.FindInstances(NewPath) do
+        for _, Container in PathUtil.FindInstances(Path) do
             Collection:AddScripts(Container)
         end
     end
