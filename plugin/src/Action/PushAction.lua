@@ -5,6 +5,8 @@ Action for pushing files out of Roblox Studio.
 --]]
 --!strict
 
+local ScriptEditorService = game:GetService("ScriptEditorService")
+
 local CommonAction = require(script.Parent:WaitForChild("CommonAction"))
 local ScriptHashCollection = require(script.Parent.Parent:WaitForChild("Collection"):WaitForChild("ScriptHashCollection"))
 local PathUtil = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("PathUtil"))
@@ -54,7 +56,7 @@ function PushAction:PushScripts(CheckoutBranch: string, PushBranch: string, Comm
         self:PerformAndParseRequest("POST", "/push/session/add", {
             session = PushSessionId,
             scriptPath = PathUtil.GetScriptPath(Script),
-            contents = Script.Source,
+            contents = ScriptEditorService:GetEditorSource(Script),
         } :: any)
     end
 
