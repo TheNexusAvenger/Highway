@@ -174,13 +174,14 @@ public class PushController : ControllerBase
                     Message = $"Performing \"git fetch\" on the forked git process failed with non-zero return code {fetchReturnCode}",
                 }.ToObjectResult(500);
             }
-            var checkoutReturnCode = await gitProcess.RunCommandAsync($"checkout \"{gitConfiguration.CheckoutBranch}\"");
+            var checkoutBranch = completeRequest.CheckoutBranch ?? gitConfiguration.CheckoutBranch;
+            var checkoutReturnCode = await gitProcess.RunCommandAsync($"checkout \"{checkoutBranch}\"");
             if (checkoutReturnCode != 0)
             {
                 return new BaseResponse()
                 {
                     Status = "PushCheckoutError",
-                    Message = $"Performing \"git checkout \"{gitConfiguration.CheckoutBranch}\" on the forked git process failed with non-zero return code {checkoutReturnCode}",
+                    Message = $"Performing \"git checkout \"{checkoutBranch}\" on the forked git process failed with non-zero return code {checkoutReturnCode}",
                 }.ToObjectResult(500);
             }
             
@@ -189,7 +190,8 @@ public class PushController : ControllerBase
             
             // Commit and push the changes.
             await gitProcess.RunCommandAsync("add .");
-            var commitReturnCode = await gitProcess.RunCommandAsync($"commit -m \"{gitConfiguration.CommitMessage ?? "Update from Roblox Studio."}\"");
+            var commitMessage = completeRequest.CommitMessage ?? gitConfiguration.CommitMessage ?? "Update from Roblox Studio.";
+            var commitReturnCode = await gitProcess.RunCommandAsync($"commit -m \"{commitMessage}\"");
             if (commitReturnCode != 0)
             {
                 return new BaseResponse()
@@ -199,13 +201,14 @@ public class PushController : ControllerBase
                 }.ToObjectResult(500);
             }
             // TODO: Remove hard-coded "origin" remote.
-            var pushReturnCode = await gitProcess.RunCommandAsync($"push origin HEAD:\"{gitConfiguration.PushBranch}\"");
+            var pushBranch = completeRequest.PushBranch ?? gitConfiguration.PushBranch;
+            var pushReturnCode = await gitProcess.RunCommandAsync($"push origin HEAD:\"{pushBranch}\"");
             if (pushReturnCode != 0)
             {
                 return new BaseResponse()
                 {
                     Status = "PushError",
-                    Message = $"Performing \"git push origin HEAD:{gitConfiguration.PushBranch}\" on the forked git process failed with non-zero return code {pushReturnCode}",
+                    Message = $"Performing \"git push origin HEAD:{pushBranch}\" on the forked git process failed with non-zero return code {pushReturnCode}",
                 }.ToObjectResult(500);
             }
         }
