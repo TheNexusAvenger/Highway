@@ -2,6 +2,7 @@
 using Highway.Server.Model.Project;
 using Highway.Server.Model.State;
 using Highway.Server.Util;
+using Highway.Server.Wrapper;
 using Microsoft.AspNetCore.Diagnostics;
 using Newtonsoft.Json;
 
@@ -146,7 +147,7 @@ public class Program
         Logger.Debug("Preparing web server.");
         var builder = WebApplication.CreateBuilder();
         builder.Logging.ClearProviders();
-        builder.Logging.AddProvider(Logger.NexusLogger);
+        builder.Logging.AddProvider(new WrappedLoggerProvider(debug ? LogLevel.Debug : LogLevel.Warning));
         builder.Services.AddControllers();
             
         // Start the server.
