@@ -104,7 +104,7 @@ function BasePromptFrame:Load(): ()
 
         --Connect the confirm button.
         local DB = true
-        self.ConfirmButton.MouseButton1Up:Connect(function()
+        self.ConfirmButton.MouseButton1Click:Connect(function()
             if DB then
                 DB = false
                 xpcall(function()

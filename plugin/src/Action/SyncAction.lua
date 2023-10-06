@@ -21,7 +21,7 @@ export type SyncAction = {
     Manifest: Types.ProjectManifest,
     new: () -> (SyncAction),
     Resync: (self: SyncAction) -> (),
-    Start: (self: SyncAction) -> (),
+    Run: (self: SyncAction) -> (),
     Stop: (self: SyncAction) -> (),
 } & CommonAction.CommonAction
 
@@ -65,9 +65,9 @@ function SyncAction:Resync(): ()
 end
 
 --[[
-Starts constant syncing.
+Runs constant syncing.
 --]]
-function SyncAction:Start(): ()
+function SyncAction:Run(): ()
     if self.Active then return end
     self.Active = true
 
@@ -75,27 +75,25 @@ function SyncAction:Start(): ()
     self:Resync()
 
     --Run the sync.
-    task.spawn(function()
-        while self.Active do
-            --Wait to update.
-            task.wait(SYNC_UPDATE_DELAY)
-            if not self.Active then break end
+    while self.Active do
+        --Wait to update.
+        task.wait(SYNC_UPDATE_DELAY)
+        if not self.Active then break end
 
-            --Get and apply the changes.
-            local Changes = self:PerformAndParseRequest("GET", "/file/list/hashes/changes").Body
-            if Changes.resync then
-                self:Resync()
-            else
-                for ScriptPath, ScriptHash in Changes.hashes.hashes do
-                    if ScriptHash == "DELETED" then
-                        ScriptUtil.Delete(ScriptPath)
-                    else
-                        ScriptUtil.CreateOrUpdate(ScriptPath, self:GetSource(ScriptPath))
-                    end
+        --Get and apply the changes.
+        local Changes = self:PerformAndParseRequest("GET", "/file/list/hashes/changes").Body
+        if Changes.resync then
+            self:Resync()
+        else
+            for ScriptPath, ScriptHash in Changes.hashes.hashes do
+                if ScriptHash == "DELETED" then
+                    ScriptUtil.Delete(ScriptPath)
+                else
+                    ScriptUtil.CreateOrUpdate(ScriptPath, self:GetSource(ScriptPath))
                 end
             end
         end
-    end)
+    end
 end
 
 --[[
