@@ -21,10 +21,12 @@ export type HashDifference = {
 }
 
 export type PullAction = {
-    HashDifferences: {[string]: {HashDifference}},
+    HashDifferences: {[string]: HashDifference},
     Manifest: Types.ProjectManifest,
     ScriptHashCollection: Types.ScriptHashCollection,
     new: () -> (PullAction),
+    CalculateHashDifferences: (self: PullAction) -> (),
+    ApplyDifferences: (self: PullAction, ProgressCallback: (string) -> (), Parent: Instance?) -> (),
 } & CommonAction.CommonAction
 
 
@@ -73,23 +75,37 @@ end
 --[[
 Applies the differences.
 --]]
-function PullAction:ApplyDifferences(Parent: Instance?): ()
+function PullAction:ApplyDifferences(ProgressCallback: (string) -> (), Parent: Instance?): ()
     Parent = Parent or game
+
+    --Determine the total scripts.
+    local TotalScriptsToPull, TotalScripts = 0, 0
+    for ScriptPath, HashDifference in self.HashDifferences do
+        TotalScripts += 1
+        if not HashDifference.New then continue end
+        TotalScriptsToPull += 1
+    end
 
     --Fetch the script sources.
     local NewSources = {}
+    local PulledScriptsCount = 0
     for ScriptPath, HashDifference in self.HashDifferences do
+        ProgressCallback("Reading scripts... ("..tostring(PulledScriptsCount + 1).."/"..tostring(TotalScriptsToPull)..")")
         if not HashDifference.New then continue end
         NewSources[ScriptPath] = self:GetSource(ScriptPath)
+        PulledScriptsCount += 1
     end
     
     --Apply the differences.
+    local UpdatedScriptsCount = 0
     for ScriptPath, HashDifference in self.HashDifferences do
+        ProgressCallback("Updating scripts... ("..tostring(UpdatedScriptsCount + 1).."/"..tostring(TotalScripts)..")")
         if HashDifference.New then
             ScriptUtil.CreateOrUpdate(ScriptPath, NewSources[ScriptPath], Parent)
         else
             ScriptUtil.Delete(ScriptPath, Parent)
         end
+        UpdatedScriptsCount += 1
     end
 end
 

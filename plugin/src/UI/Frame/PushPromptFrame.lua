@@ -29,7 +29,7 @@ local BasePromptFrame = require(script.Parent:WaitForChild("BasePromptFrame"))
 local TextListEntry = require(script.Parent:WaitForChild("TextListEntry"))
 
 local PushPromptFrame = BasePromptFrame:Extend()
-PushPromptFrame:SetClassName("BasePromptFrame")
+PushPromptFrame:SetClassName("PushPromptFrame")
 
 export type PushPromptFrame = {
     new: () -> (PushPromptFrame),
@@ -37,12 +37,6 @@ export type PushPromptFrame = {
 } & BasePromptFrame.BasePromptFrame
 
 
---[[
-Creates a BasePromptFrame object.
---]]
-function PushPromptFrame:__new(): ()
-    BasePromptFrame.__new(self)
-end
 
 --[[
 Loads the frame.
