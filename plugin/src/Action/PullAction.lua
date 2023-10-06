@@ -21,10 +21,12 @@ export type HashDifference = {
 }
 
 export type PullAction = {
+    IntegrityCheckHashes: {[string]: HashDifference},
     HashDifferences: {[string]: HashDifference},
     Manifest: Types.ProjectManifest,
     ScriptHashCollection: Types.ScriptHashCollection,
     new: () -> (PullAction),
+    PerformIntegrityCheck: (self: PullAction) -> (),
     CalculateHashDifferences: (self: PullAction) -> (),
     ApplyDifferences: (self: PullAction, ProgressCallback: (string) -> (), Parent: Instance?) -> (),
 } & CommonAction.CommonAction
@@ -38,8 +40,34 @@ function PullAction.new(): PullAction
     local self = CommonAction.new() :: any
     setmetatable(self, PullAction)
     self.Manifest = self:GetProjectManifest()
+    self.IntegrityCheckHashes = {}
     self.HashDifferences = {}
     return self :: PullAction
+end
+
+--[[
+Checks that the list of hashes stored on the server are the same.
+--]]
+function PullAction:PerformIntegrityCheck(): ()
+    local SystemHashes = (self:GetFileHashes("/project/hashes") :: Types.FileHashes).Hashes
+    local StudioHashes = {}
+    for Script, Hash in ScriptHashCollection.FromManifest(self:GetProjectManifest()).Hashes do
+        StudioHashes[PathUtil.GetScriptPath(Script)] = Hash
+    end
+    for ScriptPath, SystemHash in SystemHashes do
+        local StudioHash = StudioHashes[ScriptPath]
+        if StudioHash then
+            self.IntegrityCheckHashes[ScriptPath] = {
+                Old = SystemHash,
+                New = StudioHash,
+            } :: HashDifference
+        else
+            self.IntegrityCheckHashes[ScriptPath] = {
+                Old = SystemHash,
+                New = nil,
+            } :: HashDifference
+        end
+    end
 end
 
 --[[

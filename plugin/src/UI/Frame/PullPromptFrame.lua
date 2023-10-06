@@ -27,12 +27,13 @@ function BasePromptFrame:Load(): ()
     xpcall(function()
         --Create the action.
         local Action = PullAction.new()
+        Action:PerformIntegrityCheck()
         Action:CalculateHashDifferences()
-
+        
         --Determine the lines to display.
-        local Lines = {}
         local SecondaryColor = PluginColor.new(Enum.StudioStyleGuideColor.SubText):GetColor()
         local SecondaryColorText = "rgb("..tostring(math.floor(SecondaryColor.R * 255))..","..tostring(math.floor(SecondaryColor.G * 255))..","..tostring(math.floor(SecondaryColor.B * 255))..")"
+        local Lines = {}
         for ScriptPath, HashDiffernece in Action.HashDifferences do
             local Hash = ""
             if HashDiffernece.Old and HashDiffernece.New then
@@ -50,6 +51,36 @@ function BasePromptFrame:Load(): ()
         if #Lines == 0 then
             ChangesToPull = false
             table.insert(Lines, "<font color=\""..SecondaryColorText.."\"><i>No changes.</i></font>")
+        end
+
+        --Check that the code to pull is based on the latest changes.
+        if ChangesToPull then
+            --Build the list for the integrity check.
+            local ErrorColor = PluginColor.new(Enum.StudioStyleGuideColor.ErrorText):GetColor()
+            local ErrorColorText = "rgb("..tostring(math.floor(ErrorColor.R * 255))..","..tostring(math.floor(ErrorColor.G * 255))..","..tostring(math.floor(ErrorColor.B * 255))..")"
+            local IntegrityLines = {}
+            local IntegrityCheckPassed = true
+            for ScriptPath, HashDiffernece in Action.IntegrityCheckHashes do
+                local SystemHash = string.sub(tostring(HashDiffernece.Old), 1, 7)
+                local StudioHash = HashDiffernece.New and string.sub(HashDiffernece.New, 1, 7) or "deleted"
+                if SystemHash == StudioHash then
+                    table.insert(IntegrityLines, ScriptPath.." <font color=\""..SecondaryColorText.."\"><i>("..SystemHash..")</i></font>")
+                else
+                    table.insert(IntegrityLines, "<font color=\""..ErrorColorText.."\">"..ScriptPath.."</font> <font color=\""..SecondaryColorText.."\"><i>("..SystemHash.." expected, got "..StudioHash..")</i></font>")
+                    IntegrityCheckPassed = false
+                end
+            end
+
+            --Display the integrity check if it failed.
+            if not IntegrityCheckPassed then
+                local ElementList = TextListEntry.CreateTextList(IntegrityLines)
+                ElementList.Size = UDim2.new(1, 0, 1, -1)
+                ElementList.Parent = self.ContentsFrame
+
+                self.StatusText.Text = "System files not up to date. Push files and merge before pulling."
+                self.StatusText.TextColor3 = Enum.StudioStyleGuideColor.ErrorText
+                return
+            end
         end
 
         --Create the list.
