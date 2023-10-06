@@ -21,7 +21,7 @@ export type PushAction = {
     ScriptHashCollection: Types.ScriptHashCollection,
     new: () -> (PushAction),
     AddScripts: (self: PushAction) -> (),
-    PushScripts: (self: PushAction, ProgressCallback: (string, number) -> ()) -> (),
+    PushScripts: (self: PushAction, CheckoutBranch: string?, PushBranch: string?, CommitMessage: string?, ProgressCallback: (string) -> ()) -> (),
 } & CommonAction.CommonAction
 
 
@@ -40,7 +40,7 @@ end
 --[[
 Pushes the scripts to the remote.
 --]]
-function PushAction:PushScripts(CheckoutBranch: string, PushBranch: string, CommitMessage: string, ProgressCallback: (string, number) -> ()): ()
+function PushAction:PushScripts(CheckoutBranch: string?, PushBranch: string?, CommitMessage: string?, ProgressCallback: (string) -> ()): ()
     --Get the scripts to push.
     local ScriptsToPush = {}
     for Script, _ in self.ScriptHashCollection.Hashes do
@@ -52,7 +52,7 @@ function PushAction:PushScripts(CheckoutBranch: string, PushBranch: string, Comm
     
     --Push the scripts.
     for i, Script in ScriptsToPush do
-        ProgressCallback("Preparing scripts ("..tostring(i).."/"..tostring(#ScriptsToPush)..")", i / #ScriptsToPush)
+        ProgressCallback("Preparing scripts... ("..tostring(i).."/"..tostring(#ScriptsToPush)..")")
         self:PerformAndParseRequest("POST", "/push/session/add", {
             session = PushSessionId,
             scriptPath = PathUtil.GetScriptPath(Script),
@@ -61,7 +61,7 @@ function PushAction:PushScripts(CheckoutBranch: string, PushBranch: string, Comm
     end
 
     --Complete the session.
-    ProgressCallback("Pushing changes", 1)
+    ProgressCallback("Pushing changes...")
     self:PerformAndParseRequest("POST", "/push/session/complete", {
         session = PushSessionId,
         checkoutBranch = CheckoutBranch,
