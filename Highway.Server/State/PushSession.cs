@@ -118,7 +118,7 @@ public class PushSession
             var previousHashes = JsonConvert.DeserializeObject<ScriptHashCollection>(await File.ReadAllTextAsync(hashesFilePath))!;
             foreach (var (scriptPath, _) in previousHashes.Hashes!)
             {
-                if (this.ScriptHashCollection.Hashes!.ContainsKey(scriptPath));
+                if (this.ScriptHashCollection.Hashes!.ContainsKey(scriptPath)) continue;
                 var scriptFilePath = manifest.GetPathForScriptPath(parentDirectory, scriptPath);
                 if (scriptFilePath == null || !File.Exists(scriptFilePath)) continue;
                 File.Delete(scriptFilePath);
