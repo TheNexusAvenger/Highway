@@ -5,6 +5,8 @@ Main script for the highway plugin.
 --]]
 --!strict
 
+local PluginGuiService = game:GetService("PluginGuiService")
+
 local PluginToggleButton = require(script:WaitForChild("NexusPluginComponents"):WaitForChild("Input"):WaitForChild("Custom"):WaitForChild("PluginToggleButton"))
 local PromptWindow = require(script:WaitForChild("UI"):WaitForChild("Window"):WaitForChild("PromptWindow"))
 local LiveSyncFrame = require(script:WaitForChild("UI"):WaitForChild("Frame"):WaitForChild("LiveSyncFrame"))
@@ -33,7 +35,9 @@ local DB = true
 PushButton.Click:Connect(function()
     if DB then
         DB = false
-        PromptWindow.new("Highway - Push", PushPromptFrame.new(), plugin)
+        if not PluginGuiService:FindFirstChild("Highway - Push") then
+            PromptWindow.new("Highway - Push", PushPromptFrame.new(), plugin)
+        end
         task.wait()
         PushButton:SetActive(false)
         DB = true
@@ -43,7 +47,9 @@ end)
 PullButton.Click:Connect(function()
     if DB then
         DB = false
-        PromptWindow.new("Highway - Pull", PullPromptFrame.new(), plugin)
+        if not PluginGuiService:FindFirstChild("Highway - Pull") then
+            PromptWindow.new("Highway - Pull", PullPromptFrame.new(), plugin)
+        end
         task.wait()
         PullButton:SetActive(false)
         DB = true
