@@ -91,10 +91,24 @@ function PushPromptFrame:Load(): ()
             Labels[InputLabelData.Name] = LabelInput
         end
 
+        --Check if there are no lines to display.
+        local ChangesToPush = true
+        if #Lines == 0 then
+            ChangesToPush = false
+            table.insert(Lines, "<font color=\""..SecondaryColorText.."\"><i>No scripts.</i></font>")
+        end
+
         --Return if the game id is not allowed.
         if Action.Manifest.PushPlaceId and game.GameId ~= Action.Manifest.PushPlaceId then
             self.StatusText.Text = "Game id invalid for pushing ("..tostring(Action.Manifest.PushPlaceId).." required, got "..tostring(game.GameId)..")"
             self.StatusText.TextColor3 = Enum.StudioStyleGuideColor.ErrorText
+            return
+        end
+
+        --Return if there are no scripts to push.
+        if not ChangesToPush then
+            self.StatusText.Text = "No scripts to push."
+            self.CancelButton.Text = "Close"
             return
         end
 
