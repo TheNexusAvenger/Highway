@@ -9,6 +9,7 @@ local PluginColor = require(script.Parent.Parent.Parent:WaitForChild("NexusPlugi
 local PullAction = require(script.Parent.Parent.Parent:WaitForChild("Action"):WaitForChild("PullAction"))
 local BasePromptFrame = require(script.Parent:WaitForChild("BasePromptFrame"))
 local TextListEntry = require(script.Parent:WaitForChild("TextListEntry"))
+local Types = require(script.Parent.Parent.Parent:WaitForChild("Types"))
 
 local PullPromptFrame = BasePromptFrame:Extend()
 PullPromptFrame:SetClassName("PullPromptFrame")
@@ -16,14 +17,14 @@ PullPromptFrame:SetClassName("PullPromptFrame")
 export type PullPromptFrame = {
     new: () -> (PullPromptFrame),
     Extend: (self: PullPromptFrame) -> (PullPromptFrame),
-} & BasePromptFrame.BasePromptFrame
+} & Types.BasePromptFrame
 
 
 
 --[[
 Loads the frame.
 --]]
-function BasePromptFrame:Load(): ()
+function PullPromptFrame:Load(): ()
     xpcall(function()
         --Create the action.
         local Action = PullAction.new()

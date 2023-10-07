@@ -27,6 +27,7 @@ local PushAction = require(script.Parent.Parent.Parent:WaitForChild("Action"):Wa
 local PathUtil = require(script.Parent.Parent.Parent:WaitForChild("Util"):WaitForChild("PathUtil"))
 local BasePromptFrame = require(script.Parent:WaitForChild("BasePromptFrame"))
 local TextListEntry = require(script.Parent:WaitForChild("TextListEntry"))
+local Types = require(script.Parent.Parent.Parent:WaitForChild("Types"))
 
 local PushPromptFrame = BasePromptFrame:Extend()
 PushPromptFrame:SetClassName("PushPromptFrame")
@@ -34,14 +35,14 @@ PushPromptFrame:SetClassName("PushPromptFrame")
 export type PushPromptFrame = {
     new: () -> (PushPromptFrame),
     Extend: (self: PushPromptFrame) -> (PushPromptFrame),
-} & BasePromptFrame.BasePromptFrame
+} & Types.BasePromptFrame
 
 
 
 --[[
 Loads the frame.
 --]]
-function BasePromptFrame:Load(): ()
+function PushPromptFrame:Load(): ()
     xpcall(function()
         --Create the action.
         local Action = PushAction.new()
