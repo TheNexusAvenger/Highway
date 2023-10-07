@@ -141,12 +141,18 @@ function PushPromptFrame:Load(): ()
                     self.StatusText.Text = "Push complete."
                     self.CancelButton.Text = "Close"
                 end, function(ErrorMessage: string)
-                    --Display the error mesage.
-                    self.StatusText.Text = ErrorMessage
-                    self.StatusText.TextColor3 = Enum.StudioStyleGuideColor.ErrorText
+                    if string.find(ErrorMessage, "PushCommitError") then
+                        --Display that there was nothing to commit.
+                        self.StatusText.Text = "No changes pushed. Remote is up to date."
+                        self.CancelButton.Text = "Close"
+                    else
+                        --Display the error mesage.
+                        self.StatusText.Text = ErrorMessage
+                        self.StatusText.TextColor3 = Enum.StudioStyleGuideColor.ErrorText
 
-                    --Allow using the buttons.
-                    self.ConfirmButton.Disabled = false
+                        --Allow using the buttons.
+                        self.ConfirmButton.Disabled = false
+                    end
                 end)
                 self.CancelButton.Disabled = false
                 task.wait()
