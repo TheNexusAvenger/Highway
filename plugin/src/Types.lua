@@ -4,6 +4,8 @@ TheNexusAvenger
 Types used by the plugin.
 --]]
 
+local NexusPluginComponents = require(script.Parent:WaitForChild("NexusPluginComponents"))
+
 --Classes
 export type ScriptHashCollection = {
     new: () -> (ScriptHashCollection),
@@ -13,6 +15,18 @@ export type ScriptHashCollection = {
     AddScripts: (self: ScriptHashCollection, Container: Instance) -> (),
     ToJson: (self: ScriptHashCollection) -> (ScriptHashCollectionJson),
 }
+
+export type BasePromptFrame = {
+    ContentsFrame: NexusPluginComponents.PluginInstance,
+    BottomBar: NexusPluginComponents.PluginInstance,
+    StatusText: NexusPluginComponents.PluginInstance,
+    ConfirmButton: NexusPluginComponents.PluginInstance,
+    CancelButton: NexusPluginComponents.PluginInstance,
+
+    new: () -> (BasePromptFrame),
+    Extend: (self: BasePromptFrame) -> (BasePromptFrame),
+    Load: (self: BasePromptFrame) -> (),
+} & NexusPluginComponents.PluginInstance & Frame
 
 --Requests
 export type ScriptHashCollectionJson = {

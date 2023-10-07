@@ -9,21 +9,11 @@ local BOTTOM_BAR_HEIGHT = 32
 
 local NexusPluginComponents = require(script.Parent.Parent.Parent:WaitForChild("NexusPluginComponents"))
 local PluginInstance = require(script.Parent.Parent.Parent:WaitForChild("NexusPluginComponents"):WaitForChild("Base"):WaitForChild("PluginInstance"))
+local Types = require(script.Parent.Parent.Parent:WaitForChild("Types"))
 
 local BasePromptFrame = PluginInstance:Extend()
 BasePromptFrame:SetClassName("BasePromptFrame")
 
-export type BasePromptFrame = {
-    ContentsFrame: PluginInstance.PluginInstance,
-    BottomBar: PluginInstance.PluginInstance,
-    StatusText: PluginInstance.PluginInstance,
-    ConfirmButton: PluginInstance.PluginInstance,
-    CancelButton: PluginInstance.PluginInstance,
-
-    new: () -> (BasePromptFrame),
-    Extend: (self: BasePromptFrame) -> (BasePromptFrame),
-    Load: (self: BasePromptFrame) -> (),
-} & PluginInstance.PluginInstance & Frame
 
 
 
@@ -104,4 +94,4 @@ end
 
 
 
-return (BasePromptFrame :: any) :: BasePromptFrame
+return (BasePromptFrame :: any) :: Types.BasePromptFrame
