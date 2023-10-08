@@ -90,8 +90,8 @@ function PullPromptFrame:Load(): ()
         ElementList.Parent = self.ContentsFrame
 
         --Return if the game id is not allowed.
-        if Action.Manifest.PushPlaceId and game.GameId ~= Action.Manifest.PushPlaceId then
-            self.StatusText.Text = "Game id invalid for pushing ("..tostring(Action.Manifest.PushPlaceId).." required, got "..tostring(game.GameId)..")"
+        if Action.Manifest.PushPlaceId and game.PlaceId ~= Action.Manifest.PushPlaceId then
+            self.StatusText.Text = "Place id invalid for pushing ("..tostring(Action.Manifest.PushPlaceId).." required, got "..tostring(game.PlaceId)..")"
             self.StatusText.TextColor3 = Enum.StudioStyleGuideColor.ErrorText
             return
         end

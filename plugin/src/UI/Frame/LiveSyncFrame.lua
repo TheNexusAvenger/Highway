@@ -97,8 +97,8 @@ function LiveSyncFrame:__new(): ()
                     CurrentAction = NewAction
 
                     --Stop if the game id is not allowed to sync.
-                    if NewAction.Manifest.SyncPlaceId and game.GameId ~= NewAction.Manifest.SyncPlaceId then
-                        self.StatusText.Text = "Game id invalid for pushing ("..tostring(NewAction.Manifest.SyncPlaceId).." required, got "..tostring(game.GameId)..")"
+                    if NewAction.Manifest.SyncPlaceId and game.PlaceId ~= NewAction.Manifest.SyncPlaceId then
+                        self.StatusText.Text = "Place id invalid for pushing ("..tostring(NewAction.Manifest.SyncPlaceId).." required, got "..tostring(game.PlaceId)..")"
                         self.StatusText.TextColor3 = Enum.StudioStyleGuideColor.ErrorText
                         CurrentAction = nil
                         SyncActive = false
