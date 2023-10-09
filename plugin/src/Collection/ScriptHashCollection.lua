@@ -8,7 +8,7 @@ Stores the hashes of scripts.
 local ScriptEditorService = game:GetService("ScriptEditorService")
 
 local PathUtil = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("PathUtil"))
-local SHA256 = require(script.Parent.Parent:WaitForChild("Util"):WaitForChild("SHA256"))
+local HashLib = require(script.Parent.Parent:WaitForChild("HashLib"))
 local Types = require(script.Parent.Parent:WaitForChild("Types"))
 
 local ScriptHashCollection = {}
@@ -43,7 +43,7 @@ Adds a script hash.
 --]]
 function ScriptHashCollection:AddScript(Script: LuaSourceContainer): ()
     local Source, _ = string.gsub(ScriptEditorService:GetEditorSource(Script), "\r", "")
-    self.Hashes[Script] = SHA256(Source)
+    self.Hashes[Script] = HashLib.sha256(Source)
 end
 
 --[[

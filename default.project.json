@@ -2,6 +2,9 @@
     "name": "Highway-Plugin",
     "tree": {
         "$path": "plugin/src",
+        "HashLib": {
+            "$path": "module/HashLib/"
+        },
         "NexusPluginComponents": {
             "$path": "module/Nexus-Plugin-Components/"
         }

@@ -1,3 +1,6 @@
 [submodule "module/Nexus-Plugin-Components"]
 	path = module/Nexus-Plugin-Components
 	url = https://github.com/TheNexusAvenger/Nexus-Plugin-Components.git
+[submodule "module/HashLib"]
+	path = module/HashLib
+	url = https://github.com/howmanysmall/HashLib.git
