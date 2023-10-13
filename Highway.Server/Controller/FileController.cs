@@ -40,6 +40,7 @@ public class FileController : ControllerBase
         var projectDirectory = FileUtil.GetProjectDirectory()!;
         var configuration = FileUtil.Get<Manifest>(FileUtil.FindFileInParent(FileUtil.ProjectFileName))!;
         var hashCollection = new ScriptHashCollection();
+        var sentPaths = new List<string>();
         foreach (var (path, type) in watcher.ChangedFiles)
         {
             // Return a request to resync if the path is not a file or an existing directory.
@@ -56,10 +57,23 @@ public class FileController : ControllerBase
             // Add the script path.
             var scriptPath = configuration.GetScriptPathForPath(projectDirectory, path);
             if (scriptPath == null) continue;
-            var scriptHash = System.IO.File.Exists(path) ? HashUtil.GetHash(System.IO.File.ReadAllText(path)) : "DELETED";
-            hashCollection.Hashes!.Add(scriptPath, scriptHash);
+            try
+            {
+                var scriptHash = System.IO.File.Exists(path) ? HashUtil.GetHash(System.IO.File.ReadAllText(path)) : "DELETED";
+                hashCollection.Hashes!.Add(scriptPath, scriptHash);
+                sentPaths.Add(path);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Logger.Warn($"Reading {path} failed. Changed hash will be sent as part of the next request.");
+            }
         }
-        watcher.Reset();
+
+        // Clear the changes that were sent.
+        foreach (var path in sentPaths)
+        {
+            watcher.ChangedFiles.Remove(path);
+        }
 
         // Create and return the response.
         return new FileListHashesResponse()
