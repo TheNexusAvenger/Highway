@@ -135,6 +135,7 @@ public class PushSession
         }
         
         // Write the hash file.
+        this.ScriptHashCollection.SortHashes();
         await File.WriteAllTextAsync(hashesFilePath, JsonConvert.SerializeObject(this.ScriptHashCollection, Formatting.Indented));
     }
 }
