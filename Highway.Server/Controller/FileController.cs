@@ -63,7 +63,7 @@ public class FileController : ControllerBase
                 hashCollection.Hashes!.Add(scriptPath, scriptHash);
                 sentPaths.Add(path);
             }
-            catch (UnauthorizedAccessException)
+            catch (IOException)
             {
                 Logger.Warn($"Reading {path} failed. Changed hash will be sent as part of the next request.");
             }
